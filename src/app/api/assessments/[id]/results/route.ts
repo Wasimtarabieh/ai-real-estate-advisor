@@ -8,5 +8,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     include: { project: true },
     orderBy: { score: "desc" },
   });
-  return NextResponse.json(results);
+  return NextResponse.json(results.map((r) => r.project));
 }

@@ -3,118 +3,83 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Project {
-  id             String       @id @default(cuid())
-  name           String
-  country        String
-  city           String
-  description    String
-  images         String[]
-  videoUrl       String?
-  googleMapsUrl  String?
-  startingPrice  Float
-  minInvestment  Float
-  maxInvestment  Float
-  expectedReturn Float
-  duration       Int
-  riskLevel      RiskLevel
-  propertyType   PropertyType
-  residency      Boolean      @default(false)
-  financing      Boolean      @default(false)
-  developer      String?
-  pros           String[]
-  cons           String[]
-  tags           String[]
-  matchingRules  Json
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  country       String
+  city          String?
+  description   String
+  images        String[]
+  videoUrl      String?
+  googleMapsUrl String?
+  price         Float
+  currency      String   @default("EUR")
+  agentName     String?
+  agentEmail    String?
+  agentPhone    String?
+  isActive      Boolean  @default(true)
+
+  // matching criteria (checkboxes in admin)
+  forLiving     Boolean @default(false)
+  forVacation   Boolean @default(false)
+  forInvestment Boolean @default(false)
+
+  offPlan       Boolean @default(false)
+  ready         Boolean @default(false)
+
+  commercial    Boolean @default(false)
+  touristic     Boolean @default(false)
+  residential   Boolean @default(false)
+  agricultural  Boolean @default(false)
+  buildingPlot  Boolean @default(false)
+
+  monthlyRental Boolean @default(false)
+  shortSale     Boolean @default(false)
+  longSale      Boolean @default(false)
+
+  budgets       String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   results AssessmentResult[]
 }
 
 model Assessment {
-  id             String             @id @default(cuid())
-  budget         BudgetRange
-  goal           InvestmentGoal
-  rentalIncome   Boolean
-  duration       InvestmentDuration
-  countries      String[]
-  riskLevel      RiskLevel
-  needsFinancing Boolean
-  propertyType   PropertyType
-  residency      Boolean
-  name           String?
-  email          String?
-  phone          String?
-  createdAt      DateTime           @default(now())
+  id           String   @id @default(cuid())
+  purpose      String
+  status       String
+  propertyType String
+  priority     String
+  saleTimeline String
+  budget       String
+  createdAt    DateTime @default(now())
 
   results AssessmentResult[]
-  booking Booking?
+  lead    Lead?
 }
 
 model AssessmentResult {
   id           String     @id @default(cuid())
   assessmentId String
   projectId    String
-  score        Float
+  score        Int
   assessment   Assessment @relation(fields: [assessmentId], references: [id])
   project      Project    @relation(fields: [projectId], references: [id])
 }
 
-model Booking {
-  id           String        @id @default(cuid())
-  assessmentId String        @unique
+model Lead {
+  id           String     @id @default(cuid())
+  assessmentId String     @unique
   name         String
   email        String
   phone        String?
-  status       BookingStatus @default(PENDING)
-  notes        String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  assessment   Assessment    @relation(fields: [assessmentId], references: [id])
-}
-
-enum RiskLevel {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum PropertyType {
-  APARTMENT
-  VILLA
-  COMMERCIAL
-  LAND
-  MIXED
-}
-
-enum BudgetRange {
-  UNDER_50K
-  FROM_50K_TO_100K
-  FROM_100K_TO_250K
-  FROM_250K_TO_500K
-  ABOVE_500K
-}
-
-enum InvestmentGoal {
-  CAPITAL_GROWTH
-  RENTAL_INCOME
-  BOTH
-  RESIDENCY
-}
-
-enum InvestmentDuration {
-  SHORT
-  MEDIUM
-  LONG
-}
-
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
+  projectId    String?
+  createdAt    DateTime   @default(now())
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
 }
